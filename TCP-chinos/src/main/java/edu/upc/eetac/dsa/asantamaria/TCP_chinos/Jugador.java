@@ -7,6 +7,9 @@ public class Jugador {
 	String nombre = "";
 	InetAddress ip;
 	int puerto;
+	int apuesta;
+	int monedas;
+	boolean apostado;
 
 	Jugador() {
 	}
@@ -17,6 +20,30 @@ public class Jugador {
 		setIp(ip);
 		setPuerto(puerto);
 
+	}
+
+	public boolean getApostado() {
+		return apostado;
+	}
+
+	public void setApostado(boolean apostado) {
+		this.apostado = apostado;
+	}
+
+	public int getApuesta() {
+		return apuesta;
+	}
+
+	public void setApuesta(int apuesta) {
+		this.apuesta = apuesta;
+	}
+
+	public int getMonedas() {
+		return monedas;
+	}
+
+	public void setMonedas(int monedas) {
+		this.monedas = monedas;
 	}
 
 	public String getNombre() {

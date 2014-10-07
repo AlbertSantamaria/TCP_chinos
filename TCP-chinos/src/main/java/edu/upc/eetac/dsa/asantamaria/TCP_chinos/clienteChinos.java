@@ -46,7 +46,7 @@ public class clienteChinos implements Runnable {
 
 	void enviarJugada(PartidaStat partida) {
 		try {
-			Socket cli = new Socket("192.168.1.204", 9001);
+			Socket cli = new Socket("192.168.1.4", 9001);
 
 			System.out.println("[]-->Enviando: " + partida.getMensaje()+" al servidor.");
 			// System.out.println(bean.getMensaje());
@@ -113,18 +113,27 @@ public class clienteChinos implements Runnable {
 
 				}
 				if (objeto_rx.getMensaje().equalsIgnoreCase("WAIT BET")) {
-					System.out.println("Esperando apuesta del contrincante");
+					System.out.println("[]<--Recibido: " + objeto_rx.getMensaje()+" Esperando apuesta del contrincante...");
 
 				}
+				if (objeto_rx.getMensaje().equalsIgnoreCase("BET OF")) {
+					System.out.println("El jugador "+ objeto_rx.getNick()+" ha apostado "+objeto_rx.getApuesta());
+				}
+				if (objeto_rx.getMensaje().equalsIgnoreCase("WINNER")) {
+					System.out.println(objeto_rx.getNick()+" ha ganado!!");
+									servidor.close();
+					break;
+				}
+				
+				
 				// pone mensaje en el formulario
 				//System.out.println("[]<--Recibido:" + objeto_rx.getMensaje());
 
 				// cierra
 				serv.close();
-				if (objeto_rx.getMensaje().equalsIgnoreCase("FIN")) {
-					servidor.close();
-					break;
-				}
+
+
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
