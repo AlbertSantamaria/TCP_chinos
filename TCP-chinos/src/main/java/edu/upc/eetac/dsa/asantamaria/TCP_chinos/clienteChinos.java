@@ -44,11 +44,12 @@ public class clienteChinos implements Runnable {
 
 	}
 
-	void enviarJugada(PartidaStat partida) {
+	void enviarJugada(PartidaChip partida) {
 		try {
-			Socket cli = new Socket("192.168.1.4", 9001);
+			Socket cli = new Socket("192.168.1.204", 9001);
 
-			System.out.println("[]-->Enviando: " + partida.getMensaje()+" al servidor.");
+			System.out.println("[]-->Enviando: " + partida.getMensaje()
+					+ " al servidor.");
 			// System.out.println(bean.getMensaje());
 
 			ObjectOutputStream flujo_objetos = new ObjectOutputStream(
@@ -70,23 +71,23 @@ public class clienteChinos implements Runnable {
 			// Apertura Socket
 			servidor = new ServerSocket(9003);
 			Socket serv;
-			PartidaStat objeto_rx;
+			PartidaChip objeto_rx;
 
-			PartidaStat objeto_tx_play = new PartidaStat("PLAY", nick, 0, 0);
+			PartidaChip objeto_tx_play = new PartidaChip("PLAY", nick, 0, 0);
 			enviarJugada(objeto_tx_play);
-			
+
 			while (true) {
 
-			    // Acepta cx entrantes
+				// Acepta cx entrantes
 				serv = servidor.accept();
 
 				// Lee Objeto
 				ObjectInputStream flujo_entrada = new ObjectInputStream(
 						serv.getInputStream());
-				objeto_rx = new PartidaStat();
+				objeto_rx = new PartidaChip();
 
 				// Hay que parsearlo para recibirlo en la instancia local
-				objeto_rx = (PartidaStat) flujo_entrada.readObject();
+				objeto_rx = (PartidaChip) flujo_entrada.readObject();
 
 				if (objeto_rx.getMensaje().equalsIgnoreCase("VERSUS")) {
 					System.out.println("Jugara la partida contra "
@@ -94,46 +95,48 @@ public class clienteChinos implements Runnable {
 
 				}
 				if (objeto_rx.getMensaje().equalsIgnoreCase("YOUR BET")) {
-					System.out.println("Establezca su apuesta\n->");
-					 
+
 					Scanner in = new Scanner(System.in);
-					
-					 System.out.printf("Escriba su apuesta ->");
-					 int apuesta=in.nextInt();
-					 System.out.printf("Escriba sus monedas ->");
-					 int monedas=in.nextInt();
-					 
-					 PartidaStat objeto_tx_mybet = new PartidaStat("MY BET",nick, monedas, apuesta);
-					 
-					 enviarJugada(objeto_tx_mybet);
-					 
+					System.out.printf("Escriba su apuesta ->");
+					int apuesta = in.nextInt();
+					System.out.printf("Escriba sus monedas ->");
+					int monedas = in.nextInt();
+
+					PartidaChip objeto_tx_mybet = new PartidaChip("MY BET",
+							nick, monedas, apuesta);
+
+					enviarJugada(objeto_tx_mybet);
+
 				}
 				if (objeto_rx.getMensaje().equalsIgnoreCase("WAIT")) {
-					System.out.println("[]<--Recibido: " + objeto_rx.getMensaje()+" Esperando contrincante...");
+					System.out.println("[]<--Recibido: "
+							+ objeto_rx.getMensaje()
+							+ " Esperando contrincante...");
 
 				}
 				if (objeto_rx.getMensaje().equalsIgnoreCase("WAIT BET")) {
-					System.out.println("[]<--Recibido: " + objeto_rx.getMensaje()+" Esperando apuesta del contrincante...");
+					System.out.println("[]<--Recibido: "
+							+ objeto_rx.getMensaje()
+							+ " Esperando apuesta del contrincante...");
 
 				}
 				if (objeto_rx.getMensaje().equalsIgnoreCase("BET OF")) {
-					System.out.println("El jugador "+ objeto_rx.getNick()+" ha apostado "+objeto_rx.getApuesta());
+					System.out.println("El jugador " + objeto_rx.getNick()
+							+ " ha apostado " + objeto_rx.getApuesta());
 				}
 				if (objeto_rx.getMensaje().equalsIgnoreCase("WINNER")) {
-					System.out.println(objeto_rx.getNick()+" ha ganado!!");
-									servidor.close();
+					System.out.println("[]<--Recibido: "+objeto_rx.getNick() + " ha ganado!!");
+					servidor.close();
 					break;
 				}
-				
-				
+
 				// pone mensaje en el formulario
-				//System.out.println("[]<--Recibido:" + objeto_rx.getMensaje());
+				// System.out.println("[]<--Recibido:" +
+				// objeto_rx.getMensaje());
 
 				// cierra
 				serv.close();
 
-
-				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -9,17 +9,17 @@ public class Jugador {
 	int puerto;
 	int apuesta;
 	int monedas;
-	boolean apostado;
+	boolean apostado=false;
 
 	Jugador() {
 	}
 
-	Jugador(String nombre, InetAddress ip, int puerto) {
+	Jugador(String nombre, InetAddress ip, int puerto,boolean ap) {
 
 		setNombre(nombre);
 		setIp(ip);
 		setPuerto(puerto);
-
+		setApostado(ap);
 	}
 
 	public boolean getApostado() {

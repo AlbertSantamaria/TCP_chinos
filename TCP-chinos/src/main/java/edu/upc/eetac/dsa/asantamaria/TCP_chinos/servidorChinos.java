@@ -34,7 +34,7 @@ public class servidorChinos implements Runnable {
 			servidor = new ServerSocket(9001);
 			Socket cli;
 
-			PartidaStat objeto_rx;
+			PartidaChip objeto_rx;
 			System.out
 					.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 			System.out
@@ -44,6 +44,7 @@ public class servidorChinos implements Runnable {
 			System.out.println("");
 			System.out.println("[XX]--> Esperando jugadores...");
 			System.out.println("");
+
 			while (true) {
 				// Acepta cx entrantes
 				cli = servidor.accept();
@@ -52,20 +53,19 @@ public class servidorChinos implements Runnable {
 				ObjectInputStream flujo_entrada = new ObjectInputStream(
 						cli.getInputStream());
 
-				objeto_rx = new PartidaStat();
+				objeto_rx = new PartidaChip();
 
 				// Hay que parsearlo para recibirlo en la instancia local
-				objeto_rx = (PartidaStat) flujo_entrada.readObject();
+				objeto_rx = (PartidaChip) flujo_entrada.readObject();
 
 				if (objeto_rx.getMensaje().equalsIgnoreCase("PLAY")) {
 
 					if (!partida) {
 
-						// jugador0=new
 						// Jugador(objeto_rx.getNick(),cli.getInetAddress(),cli.getPort());
 
 						jugador0 = new Jugador(objeto_rx.getNick(),
-								cli.getInetAddress(), 9003);
+								cli.getInetAddress(), 9003, false);
 						partida = true;
 						System.out.println("[VX]<-- Recibido "
 								+ objeto_rx.getMensaje());
@@ -77,17 +77,17 @@ public class servidorChinos implements Runnable {
 										+ " puerto "
 										+ jugador0.getPuerto());
 
-						PartidaStat objeto_tx_wait = new PartidaStat("WAIT",
+						PartidaChip objeto_tx_wait = new PartidaChip("WAIT",
 								"", 0, 0);
 
 						enviarJugada(objeto_tx_wait, jugador0.getIp(),
 								jugador0.getPuerto());
 
 					} else {
-						// jugador1=new
+
 						// Jugador(objeto_rx.getNick(),cli.getInetAddress(),cli.getPort());
 						jugador1 = new Jugador(objeto_rx.getNick(),
-								cli.getInetAddress(), 9003);
+								cli.getInetAddress(), 9003, false);
 
 						System.out.println("[VV]--> Recibido "
 								+ objeto_rx.getMensaje());
@@ -96,22 +96,22 @@ public class servidorChinos implements Runnable {
 								+ jugador1.getNombre() + " " + jugador1.getIp()
 								+ " puerto " + jugador1.getPuerto());
 
-						PartidaStat objeto_tx_versus0 = new PartidaStat(
+						PartidaChip objeto_tx_versus0 = new PartidaChip(
 								"VERSUS", jugador1.getNombre(), 0, 0);
 						enviarJugada(objeto_tx_versus0, jugador0.getIp(),
 								jugador0.getPuerto());
 
-						PartidaStat objeto_tx_versus1 = new PartidaStat(
+						PartidaChip objeto_tx_versus1 = new PartidaChip(
 								"VERSUS", jugador0.getNombre(), 0, 0);
 						enviarJugada(objeto_tx_versus1, jugador1.getIp(),
 								jugador1.getPuerto());
 
-						PartidaStat objeto_tx_yourbet = new PartidaStat(
+						PartidaChip objeto_tx_yourbet = new PartidaChip(
 								"YOUR BET", "", 0, 0);
 						enviarJugada(objeto_tx_yourbet, jugador0.getIp(),
 								jugador0.getPuerto());
 
-						PartidaStat objeto_tx_waitbet = new PartidaStat(
+						PartidaChip objeto_tx_waitbet = new PartidaChip(
 								"WAIT BET", "", 0, 0);
 						enviarJugada(objeto_tx_waitbet, jugador1.getIp(),
 								jugador1.getPuerto());
@@ -123,7 +123,7 @@ public class servidorChinos implements Runnable {
 
 					// Respuesta Bet of a ambos
 
-					PartidaStat objeto_tx_betof = new PartidaStat("BET OF",
+					PartidaChip objeto_tx_betof = new PartidaChip("BET OF",
 							objeto_rx.getNick(), objeto_rx.getMonedas(),
 							objeto_rx.getApuesta());
 					enviarJugada(objeto_tx_betof, jugador0.getIp(),
@@ -138,17 +138,17 @@ public class servidorChinos implements Runnable {
 						// Se registra la apuesta
 
 						jugador0.setMonedas(objeto_rx.getMonedas());
-						jugador0.setMonedas(objeto_rx.getApuesta());
+						jugador0.setApuesta(objeto_rx.getApuesta());
 						jugador0.setApostado(true);
 
 						// Se envia un wait bet al 0 y un yourbet al 1
 
-						PartidaStat objeto_tx_waitbet = new PartidaStat(
+						PartidaChip objeto_tx_waitbet = new PartidaChip(
 								"WAIT BET", "", 0, 0);
 						enviarJugada(objeto_tx_waitbet, jugador0.getIp(),
 								jugador0.getPuerto());
 
-						PartidaStat objeto_tx_yourbet = new PartidaStat(
+						PartidaChip objeto_tx_yourbet = new PartidaChip(
 								"YOUR BET", "", 0, 0);
 						enviarJugada(objeto_tx_yourbet, jugador1.getIp(),
 								jugador1.getPuerto());
@@ -159,18 +159,22 @@ public class servidorChinos implements Runnable {
 							&& !jugador1.apostado) {
 
 						jugador1.setMonedas(objeto_rx.getMonedas());
-						jugador1.setMonedas(objeto_rx.getApuesta());
+						jugador1.setApuesta(objeto_rx.getApuesta());
 						jugador1.setApostado(true);
 
 					}
-					if (jugador1.apostado && jugador0.apostado) {
+				}
+
+				if (partida) {
+					if (jugador0.getApostado() && jugador1.getApostado()) {
 
 						int monedas = jugador0.getMonedas()
 								+ jugador1.getMonedas();
-
+						
+		
 						if (monedas == jugador0.getApuesta()) {
 
-							PartidaStat objeto_tx_win = new PartidaStat(
+							PartidaChip objeto_tx_win = new PartidaChip(
 									"WINNER", jugador0.getNombre(), 0, 0);
 							enviarJugada(objeto_tx_win, jugador0.getIp(),
 									jugador0.getPuerto());
@@ -178,10 +182,11 @@ public class servidorChinos implements Runnable {
 									jugador1.getPuerto());
 							System.out.println("[]--> " + jugador0.getNombre()
 									+ " ha ganado!");
+							servidor.close();
 						}
-						if (monedas == jugador1.getApuesta()) {
+						if (monedas==jugador1.getApuesta()) {
 
-							PartidaStat objeto_tx_win = new PartidaStat(
+							PartidaChip objeto_tx_win = new PartidaChip(
 									"WINNER", jugador1.getNombre(), 0, 0);
 							enviarJugada(objeto_tx_win, jugador0.getIp(),
 									jugador0.getPuerto());
@@ -189,20 +194,20 @@ public class servidorChinos implements Runnable {
 									jugador1.getPuerto());
 							System.out.println("[]--> " + jugador1.getNombre()
 									+ " ha ganado!");
-						}
-						else{
-							PartidaStat objeto_tx_win = new PartidaStat(
+							servidor.close();
+						
+						} else {
+							PartidaChip objeto_tx_win = new PartidaChip(
 									"WINNER", "Nadie", 0, 0);
 							enviarJugada(objeto_tx_win, jugador0.getIp(),
 									jugador0.getPuerto());
 							enviarJugada(objeto_tx_win, jugador1.getIp(),
 									jugador1.getPuerto());
-							System.out.println("[]--> " + jugador1.getNombre()
-									+ " ha ganado!");
+							System.out.println("[]--> Nadie ha ganado!");
+							servidor.close();
 						}
 					}
 				}
-
 				// pone mensaje en el formulario
 
 				if (objeto_rx.getMensaje().equalsIgnoreCase("FIN")) {
@@ -216,7 +221,7 @@ public class servidorChinos implements Runnable {
 
 	}
 
-	void enviarJugada(PartidaStat partida, InetAddress ip, int puerto) {
+	void enviarJugada(PartidaChip partida, InetAddress ip, int puerto) {
 		try {
 			Socket cli = new Socket(ip, puerto);
 
@@ -235,6 +240,5 @@ public class servidorChinos implements Runnable {
 		}
 
 	}
-
 
 }
